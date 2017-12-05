@@ -1,0 +1,5 @@
+[0m[[0mdebug[0m] [0mCopy resource mappings: [0m
+[0m[[0mdebug[0m] [0m	(/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/datafiles,/home/abhay/Downloads/SquareOne/Spark-unit-testing/target/scala-2.11/classes/datafiles)[0m
+[0m[[0mdebug[0m] [0m	(/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/log4j.properties,/home/abhay/Downloads/SquareOne/Spark-unit-testing/target/scala-2.11/classes/log4j.properties)[0m
+[0m[[0mdebug[0m] [0m	(/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/datafiles/churn-bigml-80.csv,/home/abhay/Downloads/SquareOne/Spark-unit-testing/target/scala-2.11/classes/datafiles/churn-bigml-80.csv)[0m
+[0m[[0mdebug[0m] [0m	(/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/datafiles/churn-bigml-20.csv,/home/abhay/Downloads/SquareOne/Spark-unit-testing/target/scala-2.11/classes/datafiles/churn-bigml-20.csv)[0m
