@@ -10,29 +10,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-/*
- * Dataset schema
-State
-Account length
-Area code
-International plan
-Voice mail plan
-Number vmail messages
-Total day minutes
-Total day calls
-Total day charge
-Total eve minutes
-Total eve calls	Total eve charge
-Total night minutes
-Total night calls
-Total night charge
-Total intl minutes
-Total intl calls
-Total intl charge
-Customer service calls
-Churn
- */
-
 object Churn extends App{
 
   case class Account(state: String, len: Integer, acode: String,
@@ -42,55 +19,56 @@ object Churn extends App{
                      tnmins: Double, tncalls: Double, tncharge: Double,
                      timins: Double, ticalls: Double, ticharge: Double,
                      numcs: Double, churn: String)
-  val schema = StructType(Array(
-    StructField("state", StringType, true),
-    StructField("len", IntegerType, true),
-    StructField("acode", StringType, true),
-    StructField("intlplan", StringType, true),
-    StructField("vplan", StringType, true),
-    StructField("numvmail", DoubleType, true),
-    StructField("tdmins", DoubleType, true),
-    StructField("tdcalls", DoubleType, true),
-    StructField("tdcharge", DoubleType, true),
-    StructField("temins", DoubleType, true),
-    StructField("tecalls", DoubleType, true),
-    StructField("techarge", DoubleType, true),
-    StructField("tnmins", DoubleType, true),
-    StructField("tncalls", DoubleType, true),
-    StructField("tncharge", DoubleType, true),
-    StructField("timins", DoubleType, true),
-    StructField("ticalls", DoubleType, true),
-    StructField("ticharge", DoubleType, true),
-    StructField("numcs", DoubleType, true),
-    StructField("churn", StringType, true)
-  ))
-  val spark: SparkSession = SparkSession.builder().master("local").appName("churn").getOrCreate()
 
-  def churnModel(trainingFile:String,testingFile:String):Double =  {
+  def churnModel(f:Double=0.17,t:Double=1.0):Double =  {
 
+    val schema = StructType(Array(
+      StructField("state", StringType, true),
+      StructField("len", IntegerType, true),
+      StructField("acode", StringType, true),
+      StructField("intlplan", StringType, true),
+      StructField("vplan", StringType, true),
+      StructField("numvmail", DoubleType, true),
+      StructField("tdmins", DoubleType, true),
+      StructField("tdcalls", DoubleType, true),
+      StructField("tdcharge", DoubleType, true),
+      StructField("temins", DoubleType, true),
+      StructField("tecalls", DoubleType, true),
+      StructField("techarge", DoubleType, true),
+      StructField("tnmins", DoubleType, true),
+      StructField("tncalls", DoubleType, true),
+      StructField("tncharge", DoubleType, true),
+      StructField("timins", DoubleType, true),
+      StructField("ticalls", DoubleType, true),
+      StructField("ticharge", DoubleType, true),
+      StructField("numcs", DoubleType, true),
+      StructField("churn", StringType, true)
+    ))
+
+    val spark: SparkSession = SparkSession.builder().master("local").appName("churn").getOrCreate()
     import spark.implicits._
 
     val train: Dataset[Account] = spark.read.option("inferSchema", "false")
-      .schema(schema).csv(trainingFile).as[Account]
+      .schema(schema).csv("/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/datafiles/churn-bigml-80.csv").as[Account]
     train.take(1)
     train.cache
-    println(train.count)
 
     val test: Dataset[Account] = spark.read.option("inferSchema", "false")
-      .schema(schema).csv(testingFile).as[Account]
+      .schema(schema).csv("/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/main/resources/datafiles/churn-bigml-20.csv").as[Account]
     test.take(2)
-    println(test.count)
     test.cache
 
-    train.printSchema()
-    train.show
     train.createOrReplaceTempView("account")
     spark.catalog.cacheTable("account")
 
     train.groupBy("churn").count.show
-    val fractions = Map("False" -> .17, "True" -> 1.0)
+
+    val fractions = Map("False" -> f, "True" -> t)
+    println( fractions.get( "False" ) )
     //Here we're keeping all instances of the Churn=True class, but downsampling the Churn=False class to a fraction of 388/2278.
     val strain = train.stat.sampleBy("churn", fractions, 36L)
+
+    strain.show(4)
 
     strain.groupBy("churn").count.show
     val ntrain = strain.drop("state").drop("acode").drop("vplan").drop("tdcharge").drop("techarge")

@@ -1,40 +1,30 @@
-import com.holdenkarau.spark.testing.{DataframeGenerator, SharedSparkContext}
+import java.io.IOException
+
+import com.holdenkarau.spark.testing.PerTestSparkContext
 import example.Churn
-import org.apache.spark.sql.{SaveMode, SparkSession}
-import org.scalacheck.Prop.forAll
 import org.scalatest.FunSuite
+import org.scalatest.exceptions.DiscardedEvaluationException
 import org.scalatest.prop.Checkers
 
 
-class ChurnPerformancetesting extends FunSuite with SharedSparkContext with Checkers{
+class ChurnPerformancetesting extends FunSuite with PerTestSparkContext with Checkers {
+  val model = Churn
 
-  val schema = Churn.schema
-  val spark: SparkSession = SparkSession.builder().master("local").appName("churn").getOrCreate()
-  val sQLContext = spark.sqlContext
-  val dataframegen = DataframeGenerator.arbitraryDataFrame(sQLContext,schema)
-  val tsvWithHeaderOptions: Map[String, String] = Map(
-    ("delimiter", ","),
-    ("header", "false"))
-  var metrics:Double = 0.0
-
-  test("Churning model performance benchmarking"){
-    val property = forAll(dataframegen.arbitrary){ dataframe => {
-
-        val Array(train, test) = dataframe.randomSplit(Array(0.8, 0.2))
-        val trainingFile = train.coalesce(1).write.mode(SaveMode.Overwrite ).options(tsvWithHeaderOptions )
-          .csv("/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/test/resources/datafiles/Utesting-training.csv")
-
-        val testingFile = test.coalesce(1).write.mode(SaveMode.Overwrite ).options(tsvWithHeaderOptions )
-          .csv("/home/abhay/Downloads/SquareOne/Spark-unit-testing/src/test/resources/datafiles/Utesting-testing.csv")
-
-        val trainingFilePath = getClass.getResource("/Utesting-training.csv").getPath
-        val testingFilePath = getClass.getResource("/Utesting-testing.csv").getPath
-        metrics = Churn.churnModel(trainingFilePath,testingFilePath)
+  try {
+        test( "Churning model performance benchmarking" ) {
+        val property = {
+          val metrics = model.churnModel( 0.29, 0.99)
+          println(metrics)
+          metrics
+        }
+          assert(property>=0.75 && property<0.80)
       }
-      metrics > 0.65
     }
-    println(property.getClass)
-    println(property.toString().size)
-    property.check
+  catch {
+    case ioe:IOException => ioe.printStackTrace()
+    case e:Exception => e.printStackTrace()
+    case n:NullPointerException => n.printStackTrace()
+    case p:DiscardedEvaluationException => p.printStackTrace()
+    case m:MatchError => m.printStackTrace()
   }
 }

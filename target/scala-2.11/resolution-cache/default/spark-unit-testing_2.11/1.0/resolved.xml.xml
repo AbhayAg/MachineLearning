@@ -4,7 +4,7 @@
 		module="spark-unit-testing_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20171205215252"
+		publication="20171206152048"
 	>
 		<description>
 		Spark-unit-testing
