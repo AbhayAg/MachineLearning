@@ -18,7 +18,6 @@ libraryDependencies ++= Seq(
   "org.apache.httpcomponents" % "httpcore" % "4.3.2",
   "com.datastax.spark" % "spark-cassandra-connector_2.11" % "2.0.5",
 
-  // testing Libraries
   "org.scalatest" % "scalatest_2.11" % "3.0.1" % "test",
   "org.scalacheck" %% "scalacheck" % "1.13.5" % "test",
   "com.holdenkarau" %% "spark-testing-base" % "2.2.0_0.8.0" % "test"
